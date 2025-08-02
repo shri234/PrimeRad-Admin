@@ -1,0 +1,75 @@
+//
+// Global colors
+//
+
+// Text variables
+$primary-text-emphasis-dark:        darkslategray !default;
+$secondary-text-emphasis-dark:      lighten(darkslategray, 20%) !default;
+$success-text-emphasis-dark:        lighten(darkslategray, 20%) !default;
+$info-text-emphasis-dark:           lighten(darkslategray, 20%) !default;
+$warning-text-emphasis-dark:        lighten(darkslategray, 20%) !default;
+$danger-text-emphasis-dark:         lighten(darkslategray, 20%) !default;
+$light-text-emphasis-dark:          white !default;
+$dark-text-emphasis-dark:           darkslategray !default;
+
+// Background variables
+$primary-bg-subtle-dark:            darkslategray !default;
+$secondary-bg-subtle-dark:          lighten(darkslategray, 10%) !default;
+$success-bg-subtle-dark:            lighten(darkslategray, 10%) !default;
+$info-bg-subtle-dark:               lighten(darkslategray, 10%) !default;
+$warning-bg-subtle-dark:            lighten(darkslategray, 10%) !default;
+$danger-bg-subtle-dark:             lighten(darkslategray, 10%) !default;
+$light-bg-subtle-dark:              white !default;
+$dark-bg-subtle-dark:               darkslategray !default;
+
+// Border variables
+$primary-border-subtle-dark:        lighten(darkslategray, 15%) !default;
+$secondary-border-subtle-dark:      lighten(darkslategray, 15%) !default;
+$success-border-subtle-dark:        lighten(darkslategray, 15%) !default;
+$info-border-subtle-dark:           lighten(darkslategray, 15%) !default;
+$warning-border-subtle-dark:        lighten(darkslategray, 15%) !default;
+$danger-border-subtle-dark:         lighten(darkslategray, 15%) !default;
+$light-border-subtle-dark:          white !default;
+$dark-border-subtle-dark:           darkslategray !default;
+
+$body-color-dark:                   darkslategray !default;
+$body-bg-dark:                      white !default;
+$body-secondary-color-dark:         rgba(darkslategray, 0.75) !default;
+$body-secondary-bg-dark:            lighten(darkslategray, 10%) !default;
+$body-tertiary-color-dark:          rgba(darkslategray, 0.5) !default;
+$body-tertiary-bg-dark:             lighten(darkslategray, 20%) !default;
+$body-emphasis-color-dark:          darkslategray !default;
+$border-color-dark:                 darkslategray !default;
+$border-color-translucent-dark:     rgba(darkslategray, 0.15) !default;
+$headings-color-dark:               darkslategray !default;
+$link-color-dark:                   darkslategray !default;
+$link-hover-color-dark:             lighten(darkslategray, 20%) !default;
+$code-color-dark:                   darkslategray !default;
+$mark-color-dark:                   white !default;
+$mark-bg-dark:                      darkslategray !default;
+
+//
+// Forms
+//
+
+$form-select-indicator-color-dark:  darkslategray !default;
+$form-select-indicator-dark:        url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='#{$form-select-indicator-color-dark}' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/></svg>") !default;
+
+$form-switch-color-dark:            rgba(darkslategray, 0.25) !default;
+$form-switch-bg-image-dark:         url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$form-switch-color-dark}'/></svg>") !default;
+
+// Form validation colors
+$form-valid-color-dark:             lighten(darkslategray, 20%) !default;
+$form-valid-border-color-dark:      lighten(darkslategray, 20%) !default;
+$form-invalid-color-dark:           darkslategray !default;
+$form-invalid-border-color-dark:    darkslategray !default;
+
+//
+// Accordion
+//
+
+$accordion-icon-color-dark:         darkslategray !default;
+$accordion-icon-active-color-dark:  darkslategray !default;
+
+$accordion-button-icon-dark:         url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='#{$accordion-icon-color-dark}'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !default;
+$accordion-button-active-icon-dark:  url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='#{$accordion-icon-active-color-dark}'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !default;
