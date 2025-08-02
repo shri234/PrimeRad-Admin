@@ -41,6 +41,88 @@ const rowHoverStyle = {
   color: "#222",
 };
 
+// --- Mock Data for Sessions ---
+const mockSessions = [
+  { _id: "sess1", title: "Knee MRI Essentials", module: "Orthopedics" },
+  { _id: "sess2", title: "Brain CT Interpretation", module: "Neurology" },
+  { _id: "sess3", title: "Spine X-Ray Analysis", module: "Radiology" },
+  { _id: "sess4", title: "Cardiac Angiography Basics", module: "Cardiology" },
+];
+
+// --- Mock Data for Dicom Observation Titles ---
+// This data will simulate observations for various sessions
+const mockDicomTitles = [
+  {
+    _id: "obs1",
+    sessionName: "Knee MRI Essentials",
+    sessionId: "sess1",
+    Module: "Orthopedics",
+    observations: [
+      {
+        observationText: "Medial Meniscus",
+        facultyObservation: "Degenerative changes",
+      },
+      {
+        observationText: "Lateral Collateral Ligament",
+        facultyObservation: "Intact",
+      },
+    ],
+  },
+  {
+    _id: "obs2",
+    sessionName: "Brain CT Interpretation",
+    sessionId: "sess2",
+    Module: "Neurology",
+    observations: [
+      {
+        observationText: "Grey-White Matter Differentiation",
+        facultyObservation: "Normal",
+      },
+      {
+        observationText: "Ventricle Size",
+        facultyObservation: "Within normal limits",
+      },
+    ],
+  },
+  {
+    _id: "obs3",
+    sessionName: "Knee MRI Essentials",
+    sessionId: "sess1",
+    Module: "Orthopedics",
+    observations: [
+      { observationText: "ACL", facultyObservation: "Partial tear" },
+      { observationText: "PCL", facultyObservation: "Intact" },
+    ],
+  },
+  {
+    _id: "obs4",
+    sessionName: "Spine X-Ray Analysis",
+    sessionId: "sess3",
+    Module: "Radiology",
+    observations: [
+      {
+        observationText: "Vertebral Alignment",
+        facultyObservation: "Mild scoliosis",
+      },
+      { observationText: "Disc Space L4-L5", facultyObservation: "Reduced" },
+    ],
+  },
+  {
+    _id: "obs5",
+    sessionName: "Cardiac Angiography Basics",
+    sessionId: "sess4",
+    Module: "Cardiology",
+    observations: [
+      {
+        observationText: "Left Main Coronary Artery",
+        facultyObservation: "Patent",
+      },
+      { observationText: "Ejection Fraction", facultyObservation: "Normal" },
+    ],
+  },
+];
+// --- End Mock Data ---
+
 const DicomObservationTitlesList = () => {
   const navigate = useNavigate();
   const [dicomTitles, setDicomTitles] = useState([]);
@@ -48,44 +130,79 @@ const DicomObservationTitlesList = () => {
   const [sessions, setSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState("");
 
+  // Effect to fetch sessions for the filter dropdown
   useEffect(() => {
     setLoading(true);
     getSessions()
       .then((res) => {
-        setSessions(res.data.data);
+        if (
+          res.data &&
+          Array.isArray(res.data.data) &&
+          res.data.data.length > 0
+        ) {
+          setSessions(res.data.data);
+          console.log("Fetched live sessions for filter.");
+        } else {
+          setSessions(mockSessions);
+          console.warn(
+            "API returned no sessions or invalid format. Using mock sessions."
+          );
+        }
         setLoading(false);
       })
       .catch((err) => {
+        console.error("Error fetching sessions for filter from API:", err);
+        setSessions(mockSessions);
+        console.log("Using mock sessions for filter due to API error.");
         setLoading(false);
-        console.error(err);
       });
   }, []);
 
+  // Effect to fetch Dicom Observations based on selectedSession
   useEffect(() => {
+    setLoading(true);
+    let promise;
+
     if (selectedSession) {
-      setLoading(true);
-      getObservationsBySession(selectedSession)
-        .then((res) => {
-          setDicomTitles(res.data.data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setLoading(false);
-          console.error(err);
-        });
+      // Filter mock data by sessionId if using mock data
+      if (sessions === mockSessions) {
+        const filteredMock = mockDicomTitles.filter(
+          (item) => item.sessionId === selectedSession
+        );
+        promise = Promise.resolve({ data: { data: filteredMock } });
+      } else {
+        promise = getObservationsBySession(selectedSession);
+      }
     } else {
-      setLoading(true);
-      getDicomObservationTitles()
-        .then((res) => {
-          setDicomTitles(res.data.data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setLoading(false);
-          console.error(err);
-        });
+      // Use mock data if sessions are mock AND no session is selected
+      if (sessions === mockSessions) {
+        promise = Promise.resolve({ data: { data: mockDicomTitles } });
+      } else {
+        promise = getDicomObservationTitles();
+      }
     }
-  }, [selectedSession]);
+
+    promise
+      .then((res) => {
+        if (res.data && Array.isArray(res.data.data)) {
+          setDicomTitles(res.data.data);
+          console.log(`Fetched ${res.data.data.length} dicom titles.`);
+        } else {
+          // If API returns no data or invalid data, fall back to default mock data (all)
+          setDicomTitles(mockDicomTitles);
+          console.warn(
+            "API returned no dicom titles or invalid format. Using all mock dicom titles."
+          );
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching dicom observation titles from API:", err);
+        setDicomTitles(mockDicomTitles); // Fallback to all mock data on error
+        console.log("Using all mock dicom titles due to API error.");
+        setLoading(false);
+      });
+  }, [selectedSession, sessions]); // Re-run when selectedSession changes or when sessions data loads
 
   const handleSessionChange = (e) => {
     setSelectedSession(e.target.value);
@@ -126,7 +243,12 @@ const DicomObservationTitlesList = () => {
               </div>
               <div className="mb-3 d-flex align-items-center">
                 <Form.Group controlId="sessionFilter" className="w-auto me-3">
-                  <Form.Label>Filter by Session</Form.Label>
+                  <Form.Label
+                    className="me-2"
+                    style={{ color: "#222", fontWeight: 500 }}
+                  >
+                    Filter by Session:
+                  </Form.Label>
                   <Form.Select
                     value={selectedSession}
                     onChange={handleSessionChange}
@@ -162,7 +284,12 @@ const DicomObservationTitlesList = () => {
                 </select>
                 <span>records per page</span>
                 <div className="ms-auto">
-                  <span className="me-2">Search:</span>
+                  <span
+                    className="me-2"
+                    style={{ color: "#222", fontWeight: 500 }}
+                  >
+                    Search:
+                  </span>
                   <input
                     type="text"
                     className="form-control d-inline-block w-auto bg-white text-dark"
@@ -187,87 +314,121 @@ const DicomObservationTitlesList = () => {
                     </Spinner>
                   </div>
                 ) : (
-                  <Table
-                    bordered
-                    hover
-                    className="mb-0"
-                    style={{ borderColor: "#e0e0e0", background: "#fff" }}
-                  >
-                    <thead>
-                      <tr>
-                        <th style={headerStyle}>S.No.</th>
-                        <th style={headerStyle}>Session Name</th>
-                        <th style={headerStyle}>Module</th>
-                        <th style={headerStyle}>Observations</th>
-                        <th style={headerStyle}>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dicomTitles.map((item, idx) => (
-                        <tr
-                          key={idx}
-                          style={cellStyle}
-                          onMouseOver={(e) =>
-                            Object.assign(e.currentTarget.style, rowHoverStyle)
-                          }
-                          onMouseOut={(e) =>
-                            Object.assign(e.currentTarget.style, cellStyle)
-                          }
-                        >
-                          <td style={cellStyle}>{idx + 1}</td>
-                          <td style={cellStyle}>{item.sessionName}</td>
-                          <td style={cellStyle}>{item.Module}</td>
-                          <td style={cellStyle}>
-                            <OverlayTrigger
-                              placement="top"
-                              overlay={
-                                <Popover>
-                                  <Popover.Body>
-                                    {item.observations.map((obs, i) => (
-                                      <div key={i}>
-                                        <strong>{obs.observationText}:</strong>{" "}
-                                        {obs.facultyObservation}
-                                      </div>
-                                    ))}
-                                  </Popover.Body>
-                                </Popover>
+                  <>
+                    {dicomTitles.length === 0 ? (
+                      <div className="text-center p-4">
+                        No Dicom Observation Titles found for this selection.
+                      </div>
+                    ) : (
+                      <Table
+                        bordered
+                        hover
+                        className="mb-0"
+                        style={{ borderColor: "#e0e0e0", background: "#fff" }}
+                      >
+                        <thead>
+                          <tr>
+                            <th style={headerStyle}>S.No.</th>
+                            <th style={headerStyle}>Session Name</th>
+                            <th style={headerStyle}>Module</th>
+                            <th style={headerStyle}>Observations</th>
+                            <th style={headerStyle}>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dicomTitles.map((item, idx) => (
+                            <tr
+                              key={item._id || idx} // Use _id if available, fallback to index
+                              style={cellStyle}
+                              onMouseOver={(e) =>
+                                Object.assign(
+                                  e.currentTarget.style,
+                                  rowHoverStyle
+                                )
+                              }
+                              onMouseOut={(e) =>
+                                Object.assign(e.currentTarget.style, cellStyle)
                               }
                             >
-                              <Button
-                                variant="link"
-                                size="sm"
-                                style={{
-                                  padding: 0,
-                                  color: "#2196f3",
-                                  background: "transparent",
-                                  border: "none",
-                                }}
-                              >
-                                {item.observations.length}
-                              </Button>
-                            </OverlayTrigger>
-                          </td>
-                          <td style={cellStyle}>
-                            <Button
-                              variant="link"
-                              size="sm"
-                              style={{ padding: 0 }}
-                              onClick={() =>
-                                navigate("/create/dicom-observation-titles", {
-                                  state: item,
-                                })
-                              }
-                            >
-                              <i
-                                className="fa-regular fa-pen-to-square"
-                                style={actionIconStyle}
-                              ></i>
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                              <td style={cellStyle}>{idx + 1}</td>
+                              <td style={cellStyle}>{item.sessionName}</td>
+                              <td style={cellStyle}>{item.Module}</td>
+                              <td style={cellStyle}>
+                                <OverlayTrigger
+                                  placement="top"
+                                  overlay={
+                                    <Popover
+                                      id={`popover-observations-${
+                                        item._id || idx
+                                      }`}
+                                    >
+                                      <Popover.Body>
+                                        <ul className="list-unstyled mb-0">
+                                          {item.observations &&
+                                          item.observations.length > 0 ? (
+                                            item.observations.map((obs, i) => (
+                                              <li key={i} className="mb-2">
+                                                <strong>
+                                                  {obs.observationText || "N/A"}
+                                                  :
+                                                </strong>{" "}
+                                                {obs.facultyObservation ||
+                                                  "No faculty observation"}
+                                              </li>
+                                            ))
+                                          ) : (
+                                            <li>
+                                              No detailed observations
+                                              available.
+                                            </li>
+                                          )}
+                                        </ul>
+                                      </Popover.Body>
+                                    </Popover>
+                                  }
+                                >
+                                  <Button
+                                    variant="link"
+                                    size="sm"
+                                    style={{
+                                      padding: 0,
+                                      color: "#2196f3",
+                                      background: "transparent",
+                                      border: "none",
+                                    }}
+                                  >
+                                    {item.observations
+                                      ? item.observations.length
+                                      : 0}
+                                  </Button>
+                                </OverlayTrigger>
+                              </td>
+                              <td style={cellStyle}>
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  style={{ padding: 0 }}
+                                  onClick={() =>
+                                    navigate(
+                                      "/create/dicom-observation-titles",
+                                      {
+                                        state: item, // Pass the whole item for editing
+                                      }
+                                    )
+                                  }
+                                >
+                                  <i
+                                    className="fa-regular fa-pen-to-square"
+                                    style={actionIconStyle}
+                                  ></i>
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    )}
+                  </>
                 )}
               </div>
               <div className="d-flex justify-content-between align-items-center mt-2">

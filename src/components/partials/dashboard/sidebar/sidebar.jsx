@@ -84,7 +84,7 @@ const Sidebar = memo(() => {
                 textOverflow: "ellipsis",
               }}
             >
-              PrimeRad Admin
+              PrimeAdmin
             </h3>
           </Link>
           <div

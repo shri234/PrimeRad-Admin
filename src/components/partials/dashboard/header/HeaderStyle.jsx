@@ -112,7 +112,7 @@ const Header = memo((props) => {
                 className="logo-title d-none d-sm-block"
                 data-setting="app_name"
               >
-                PrimeRad Admin
+                PrimeAdmin
               </h3>
             </Link>
           </div>

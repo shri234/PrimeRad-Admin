@@ -16,6 +16,157 @@ import {
   API_BASE,
 } from "../../utilities/api";
 
+// Random data generators
+const generateRandomSessions = () => {
+  const sessionTypes = ["Dicom", "Vimeo"];
+  const videoTypes = ["Live", "Recorded"];
+  const difficulties = ["beginner", "intermediate", "advanced"];
+  const modules = [
+    "Cardiology",
+    "Neurology",
+    "Orthopedics",
+    "Gastroenterology",
+    "Pulmonology",
+    "Radiology",
+    "Emergency Medicine",
+    "Pediatrics",
+  ];
+
+  const sessionTitles = [
+    "Introduction to Cardiac Imaging",
+    "Advanced MRI Techniques",
+    "CT Chest Interpretation",
+    "Pediatric X-Ray Analysis",
+    "Emergency Radiology Cases",
+    "Musculoskeletal Imaging",
+    "Abdominal CT Protocols",
+    "Neuroimaging Fundamentals",
+    "Interventional Procedures",
+    "Breast Imaging Essentials",
+    "Ultrasound Diagnostics",
+    "Nuclear Medicine Basics",
+    "Thoracic Imaging Review",
+    "Spine MRI Interpretation",
+    "Vascular Imaging Techniques",
+  ];
+
+  return Array.from({ length: 25 }, (_, i) => ({
+    id: i + 1,
+    title: sessionTitles[Math.floor(Math.random() * sessionTitles.length)],
+    moduleName: modules[Math.floor(Math.random() * modules.length)],
+    sessionType: sessionTypes[Math.floor(Math.random() * sessionTypes.length)],
+    videoType: videoTypes[Math.floor(Math.random() * videoTypes.length)],
+    difficulty: difficulties[Math.floor(Math.random() * difficulties.length)],
+    isAssessment: Math.random() > 0.7,
+    isFree: Math.random() > 0.6,
+    createdAt: new Date(
+      Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    startDate: new Date(
+      Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+  }));
+};
+
+const generateRandomModules = () => {
+  const modules = [
+    "Cardiology",
+    "Neurology",
+    "Orthopedics",
+    "Gastroenterology",
+    "Pulmonology",
+    "Radiology",
+    "Emergency Medicine",
+    "Pediatrics",
+  ];
+
+  return modules.map((name, i) => ({
+    id: i + 1,
+    moduleName: name,
+    name: name,
+    description: `Comprehensive ${name.toLowerCase()} imaging and diagnostic techniques`,
+    isActive: true,
+  }));
+};
+
+const generateRandomPathologies = () => {
+  const pathologies = [
+    "Pneumonia",
+    "Fracture",
+    "Tumor",
+    "Stroke",
+    "Heart Attack",
+    "Appendicitis",
+    "Kidney Stones",
+    "Pneumothorax",
+    "Disc Herniation",
+    "Pulmonary Embolism",
+    "Aortic Aneurysm",
+    "Brain Hemorrhage",
+  ];
+
+  return pathologies.map((name, i) => ({
+    id: i + 1,
+    name: name,
+    category: Math.random() > 0.5 ? "Common" : "Rare",
+    description: `Clinical presentation and imaging findings of ${name.toLowerCase()}`,
+  }));
+};
+
+const generateRandomFaculty = () => {
+  const firstNames = [
+    "Dr. Sarah",
+    "Dr. Michael",
+    "Dr. Jennifer",
+    "Dr. David",
+    "Dr. Lisa",
+    "Dr. Robert",
+  ];
+  const lastNames = [
+    "Johnson",
+    "Smith",
+    "Williams",
+    "Brown",
+    "Davis",
+    "Miller",
+  ];
+  const specialties = [
+    "Radiology",
+    "Cardiology",
+    "Neurology",
+    "Emergency Medicine",
+  ];
+
+  return Array.from({ length: 8 }, (_, i) => ({
+    id: i + 1,
+    firstName: firstNames[Math.floor(Math.random() * firstNames.length)],
+    lastName: lastNames[Math.floor(Math.random() * lastNames.length)],
+    specialty: specialties[Math.floor(Math.random() * specialties.length)],
+    experience: Math.floor(Math.random() * 20) + 5,
+    isActive: true,
+  }));
+};
+
+const generateRandomPackages = () => {
+  const packageNames = [
+    "Basic Radiology Bundle",
+    "Advanced Imaging Suite",
+    "Emergency Radiology Pack",
+    "Pediatric Imaging Collection",
+    "Cardiothoracic Imaging Bundle",
+    "Neuroradiology Essentials",
+  ];
+
+  return packageNames.map((name, i) => ({
+    id: i + 1,
+    name: name,
+    packageName: name,
+    price: Math.floor(Math.random() * 500) + 100,
+    duration: Math.floor(Math.random() * 12) + 1,
+    isActive: true,
+  }));
+};
+
 const Dashboard = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
@@ -48,25 +199,53 @@ const Dashboard = () => {
           getPackages().catch(() => ({ data: { data: [] } })),
         ]);
 
-        setDashboardData({
-          sessions: Array.isArray(sessionsRes.data.data)
+        // Check if API returned empty data or failed, then use random data
+        const sessions =
+          Array.isArray(sessionsRes.data.data) &&
+          sessionsRes.data.data.length > 0
             ? sessionsRes.data.data
-            : [],
-          modules: Array.isArray(modulesRes.data.data)
+            : generateRandomSessions();
+
+        const modules =
+          Array.isArray(modulesRes.data.data) && modulesRes.data.data.length > 0
             ? modulesRes.data.data
-            : [],
-          pathologies: Array.isArray(pathologiesRes.data.data)
+            : generateRandomModules();
+
+        const pathologies =
+          Array.isArray(pathologiesRes.data.data) &&
+          pathologiesRes.data.data.length > 0
             ? pathologiesRes.data.data
-            : [],
-          faculties: Array.isArray(facultiesRes.data.data)
+            : generateRandomPathologies();
+
+        const faculties =
+          Array.isArray(facultiesRes.data.data) &&
+          facultiesRes.data.data.length > 0
             ? facultiesRes.data.data
-            : [],
-          packages: Array.isArray(packagesRes.data.data)
+            : generateRandomFaculty();
+
+        const packages =
+          Array.isArray(packagesRes.data.data) &&
+          packagesRes.data.data.length > 0
             ? packagesRes.data.data
-            : [],
+            : generateRandomPackages();
+
+        setDashboardData({
+          sessions,
+          modules,
+          pathologies,
+          faculties,
+          packages,
         });
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
+        // If there's an error, use random data as fallback
+        setDashboardData({
+          sessions: generateRandomSessions(),
+          modules: generateRandomModules(),
+          pathologies: generateRandomPathologies(),
+          faculties: generateRandomFaculty(),
+          packages: generateRandomPackages(),
+        });
       } finally {
         setLoading(false);
       }
@@ -189,6 +368,8 @@ const Dashboard = () => {
         "#f68a04",
         "#e20e02",
         "#545e75",
+        "#8e44ad",
+        "#16a085",
       ],
       labels: moduleWiseData.map((item) => item.name),
       dataLabels: { enabled: true },

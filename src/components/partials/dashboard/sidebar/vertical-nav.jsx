@@ -42,7 +42,6 @@ const VerticalNav = memo(() => {
             >
               Create
             </span>
-            {/* REMOVED: <i className="fa-solid fa-chevron-down ms-auto"></i> */}
           </Accordion.Button>
           <Accordion.Collapse eventKey="create">
             <ul className="sub-nav">

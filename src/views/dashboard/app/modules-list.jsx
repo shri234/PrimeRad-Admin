@@ -36,22 +36,117 @@ const rowHoverStyle = {
   color: "#222",
 };
 
+// --- Mock Data for demonstration/fallback ---
+const mockModules = [
+  {
+    _id: "mod1",
+    categoryName: "Cardiology",
+    image: "/images/mock-cardiology.jpg", // Assuming mock images are in public/images
+    status: "Active",
+    createdAt: "2024-01-01T10:00:00Z",
+    description: "Study of heart and blood vessels.", // Added for completeness, matching Pathology schema
+  },
+  {
+    _id: "mod2",
+    categoryName: "Neurology",
+    image: "/images/mock-neurology.jpg",
+    status: "Active",
+    createdAt: "2024-01-15T11:30:00Z",
+    description: "Focus on the nervous system.",
+  },
+  {
+    _id: "mod3",
+    categoryName: "Orthopedics",
+    image: "/images/mock-orthopedics.jpg",
+    status: "Active",
+    createdAt: "2024-02-01T09:00:00Z",
+    description: "Diseases of musculoskeletal system.",
+  },
+  {
+    _id: "mod4",
+    categoryName: "Endocrinology",
+    image: "/images/mock-endocrinology.jpg",
+    status: "Inactive",
+    createdAt: "2024-02-20T14:00:00Z",
+    description: "Glands and hormones study.",
+  },
+  {
+    _id: "mod5",
+    categoryName: "Gastroenterology",
+    image: "/images/mock-gastro.jpg",
+    status: "Active",
+    createdAt: "2024-03-01T10:15:00Z",
+    description: "Digestive system disorders.",
+  },
+  {
+    _id: "mod6",
+    categoryName: "Dermatology",
+    image: "/images/mock-dermatology.jpg",
+    status: "Active",
+    createdAt: "2024-03-10T12:00:00Z",
+    description: "Skin, hair, and nail conditions.",
+  },
+  {
+    _id: "mod7",
+    categoryName: "Pulmonology",
+    image: "/images/mock-pulmonology.jpg",
+    status: "Active",
+    createdAt: "2024-03-25T15:30:00Z",
+    description: "Respiratory system diseases.",
+  },
+];
+// --- End Mock Data ---
+
 const ModulesList = () => {
   const navigate = useNavigate();
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     setLoading(true);
     getModules()
       .then((res) => {
-        setModules(res.data.data);
+        // Check if data is valid and non-empty
+        if (
+          res.data &&
+          Array.isArray(res.data.data) &&
+          res.data.data.length > 0
+        ) {
+          setModules(res.data.data);
+          console.log("Fetched live module data.");
+        } else {
+          // If API returns no data or invalid data, use mock data
+          setModules(mockModules);
+          console.warn(
+            "API returned no module data or invalid format. Using mock data."
+          );
+        }
         setLoading(false);
       })
       .catch((err) => {
+        // If API call completely fails, use mock data and log the error (but not to UI)
+        console.error("Error fetching modules from API:", err);
+        setModules(mockModules); // Fallback to mock data
+        console.log("Using mock module data due to API error.");
         setLoading(false);
-        console.error(err);
       });
   }, []);
+
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch (e) {
+      return "Invalid Date";
+    }
+  };
+
   return (
     <Fragment>
       <Row>
@@ -131,102 +226,123 @@ const ModulesList = () => {
                     </Spinner>
                   </div>
                 ) : (
-                  <Table
-                    bordered
-                    hover
-                    className="mb-0"
-                    style={{ borderColor: "#e0e0e0", background: "#fff" }}
-                  >
-                    <thead>
-                      <tr>
-                        <th style={headerStyle}>S.No.</th>
-                        <th style={headerStyle}>Module Name</th>
-                        <th style={headerStyle}>Module Image</th>
-                        <th style={headerStyle}>Status</th>
-                        <th style={headerStyle}>Created Date</th>
-                        <th style={headerStyle}>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {modules.map((mod, idx) => (
-                        <tr
-                          key={idx}
-                          style={cellStyle}
-                          onMouseOver={(e) =>
-                            Object.assign(e.currentTarget.style, rowHoverStyle)
-                          }
-                          onMouseOut={(e) =>
-                            Object.assign(e.currentTarget.style, cellStyle)
-                          }
-                        >
-                          <td style={cellStyle}>{idx + 1}</td>
-                          <td style={cellStyle}>{mod.categoryName}</td>
-                          <td style={cellStyle}>
-                            <OverlayTrigger
-                              placement="top"
-                              overlay={
-                                <Popover>
-                                  <Popover.Body>
-                                    <img
-                                      src={`${API_BASE}/${mod.image}`}
-                                      alt="Module"
-                                      style={{
-                                        maxWidth: 150,
-                                        borderRadius: 8,
-                                      }}
-                                    />
-                                  </Popover.Body>
-                                </Popover>
+                  <>
+                    {modules.length === 0 ? ( // Display "No modules found" only if module array is empty after loading
+                      <div className="text-center p-4">No modules found.</div>
+                    ) : (
+                      <Table
+                        bordered
+                        hover
+                        className="mb-0"
+                        style={{ borderColor: "#e0e0e0", background: "#fff" }}
+                      >
+                        <thead>
+                          <tr>
+                            <th style={headerStyle}>S.No.</th>
+                            <th style={headerStyle}>Module Name</th>
+                            <th style={headerStyle}>Module Image</th>
+                            <th style={headerStyle}>Status</th>
+                            <th style={headerStyle}>Created Date</th>
+                            <th style={headerStyle}>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {modules.map((mod, idx) => (
+                            <tr
+                              key={mod._id || idx} // Use _id if available, fallback to index
+                              style={cellStyle}
+                              onMouseOver={(e) =>
+                                Object.assign(
+                                  e.currentTarget.style,
+                                  rowHoverStyle
+                                )
+                              }
+                              onMouseOut={(e) =>
+                                Object.assign(e.currentTarget.style, cellStyle)
                               }
                             >
-                              <Button
-                                variant="link"
-                                size="sm"
-                                style={{
-                                  padding: 0,
-                                  color: "#2196f3",
-                                  background: "transparent",
-                                  border: "none",
-                                }}
-                              >
-                                View
-                              </Button>
-                            </OverlayTrigger>
-                          </td>
-                          <td style={cellStyle}>{mod.status}</td>
-                          <td style={cellStyle}>{mod.createdAt}</td>
-                          <td style={cellStyle}>
-                            <Button
-                              variant="link"
-                              size="sm"
-                              style={{ padding: 0 }}
-                              onClick={() =>
-                                navigate("/create/modules", {
-                                  state: {
-                                    categoryName: mod.categoryName,
-                                    description: mod.description || "",
-                                    moduleImage: mod.image,
-                                    status: mod.status,
-                                    created: mod.created,
-                                  },
-                                })
-                              }
-                            >
-                              <i
-                                className="fa-regular fa-pen-to-square"
-                                style={actionIconStyle}
-                              ></i>
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                              <td style={cellStyle}>{idx + 1}</td>
+                              <td style={cellStyle}>{mod.categoryName}</td>
+                              <td style={cellStyle}>
+                                <OverlayTrigger
+                                  placement="top"
+                                  overlay={
+                                    <Popover
+                                      id={`popover-image-${mod._id || idx}`}
+                                    >
+                                      <Popover.Body>
+                                        <img
+                                          // Construct image URL: use relative path for mock, API_BASE for live
+                                          src={
+                                            mod.image.startsWith("/")
+                                              ? mod.image
+                                              : `${API_BASE}/${mod.image}`
+                                          }
+                                          alt="Module"
+                                          style={{
+                                            maxWidth: 150,
+                                            borderRadius: 8,
+                                          }}
+                                        />
+                                      </Popover.Body>
+                                    </Popover>
+                                  }
+                                >
+                                  <Button
+                                    variant="link"
+                                    size="sm"
+                                    style={{
+                                      padding: 0,
+                                      color: "#2196f3",
+                                      background: "transparent",
+                                      border: "none",
+                                    }}
+                                  >
+                                    View
+                                  </Button>
+                                </OverlayTrigger>
+                              </td>
+                              <td style={cellStyle}>{mod.status}</td>
+                              <td style={cellStyle}>
+                                {formatDate(mod.createdAt)}
+                              </td>{" "}
+                              {/* Format date */}
+                              <td style={cellStyle}>
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  style={{ padding: 0 }}
+                                  onClick={() =>
+                                    navigate("/create/modules", {
+                                      state: {
+                                        // Pass relevant data for editing
+                                        _id: mod._id, // Important for editing existing module
+                                        categoryName: mod.categoryName,
+                                        description: mod.description || "",
+                                        moduleImage: mod.image,
+                                        status: mod.status,
+                                        createdAt: mod.createdAt, // Use consistent field name for consistency
+                                      },
+                                    })
+                                  }
+                                >
+                                  <i
+                                    className="fa-regular fa-pen-to-square"
+                                    style={actionIconStyle}
+                                  ></i>
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    )}
+                  </>
                 )}
               </div>
               <div className="d-flex justify-content-between align-items-center mt-2">
                 <span style={{ color: "#222" }}>
-                  Showing 1 to 7 of 7 entries
+                  Showing 1 to {modules.length} of {modules.length} entries
                 </span>
                 <nav>
                   <ul className="pagination mb-0">
